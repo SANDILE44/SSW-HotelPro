@@ -1,9 +1,38 @@
 // script.js
 
-// hamburger 
-function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("hidden");
+// script.js
+
+// Grab the sidebar and main content
+const sidebar = document.getElementById("sidebar");
+const mainContent = document.querySelector("main");
+
+// Function to toggle sidebar
+function toggleSidebar() {
+  sidebar.classList.toggle("active");
+  mainContent.classList.toggle("shifted");
 }
+
+// Optional: Close sidebar if clicking outside (mobile only)
+document.addEventListener("click", function(e) {
+  if (
+    !sidebar.contains(e.target) && 
+    !e.target.classList.contains("hamburger") &&
+    sidebar.classList.contains("active") &&
+    window.innerWidth < 768
+  ) {
+    sidebar.classList.remove("active");
+    mainContent.classList.remove("shifted");
+  }
+});
+
+// Handle window resize: remove mobile sidebar if switching to desktop
+window.addEventListener("resize", function() {
+  if(window.innerWidth >= 768) {
+    sidebar.classList.remove("active");
+    mainContent.classList.remove("shifted");
+  }
+});
+
 
 
 
