@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelPro Payments</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Navbar -->
+<header class="bg-white shadow fixed w-full z-50 top-0 h-16 flex items-center px-4">
+  <div class="flex items-center">
+    <button id="hamburgerBtn" class="text-2xl mr-3 md:hidden">☰</button>
+    <img src="logo.png" alt="Logo" class="h-10 w-10 mr-2">
+    <h1 class="text-xl font-bold">HotelPro Payments</h1>
+  </div>
+  <div>
+    <button class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:relative z-40">
+  <nav class="pt-16 p-4 space-y-3">
+    <a href="dashboard.html" class="block p-2 rounded hover:bg-gray-200">Dashboard</a>
+    <a href="bookings.html" class="block p-2 rounded hover:bg-gray-200">Bookings</a>
+    <a href="rooms.html" class="block p-2 rounded hover:bg-gray-200">Rooms</a>
+    <a href="payments.html" class="block p-2 rounded bg-gray-200">Payments</a>
+    <a href="#" class="block p-2 rounded hover:bg-gray-200">Reports</a>
+    <a href="#" class="block p-2 rounded hover:bg-gray-200">Settings</a>
+  </nav>
+</aside>
+
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-30 md:hidden"></div>
+
+<main class="flex-1 p-6 mt-16 md:mt-0 md:ml-64">
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Total Payments</p>
+      <h2 id="totalPayments" class="text-2xl font-bold">0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Total Revenue</p>
+      <h2 id="totalRevenue" class="text-2xl font-bold">R0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Pending Payments</p>
+      <h2 id="pendingPayments" class="text-2xl font-bold">0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Overdue Payments</p>
+      <h2 id="overduePayments" class="text-2xl font-bold">0</h2>
+    </div>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="bg-white shadow rounded p-4 mb-6 overflow-x-auto">
+    <h3 class="text-lg font-bold mb-4">Payments</h3>
+    <table class="w-full table-auto text-left">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2">Guest Name</th>
+          <th class="px-4 py-2">Room #</th>
+          <th class="px-4 py-2">Booking Dates</th>
+          <th class="px-4 py-2">Amount</th>
+          <th class="px-4 py-2">Payment Method</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="paymentsTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Add Payment Form -->
+  <div class="bg-white shadow rounded p-6 mb-6">
+    <h3 class="text-lg font-bold mb-4">Add New Payment</h3>
+    <form id="paymentForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <input type="text" id="guestName" placeholder="Guest Name" class="p-2 border rounded w-full" required>
+      <input type="text" id="roomNumber" placeholder="Room #" class="p-2 border rounded w-full" required>
+      <input type="text" id="bookingDates" placeholder="Booking Dates" class="p-2 border rounded w-full" required>
+      <input type="number" id="amount" placeholder="Amount (R)" min="0" class="p-2 border rounded w-full" required>
+
+      <select id="paymentMethod" class="p-2 border rounded w-full">
+        <option value="">Select Payment Method</option>
+        <option>Cash</option>
+        <option>Card</option>
+        <option>Online</option>
+      </select>
+
+      <select id="status" class="p-2 border rounded w-full">
+        <option>Paid</option>
+        <option>Pending</option>
+        <option>Overdue</option>
+      </select>
+
+      <button type="submit" class="col-span-1 sm:col-span-2 lg:col-span-4 bg-green-500 text-white p-2 rounded hover:bg-green-600 transition">
+        Add Payment
+      </button>
+
+    </form>
+  </div>
+
+</main>
+
+<footer class="bg-white text-center p-4 mt-6 shadow">
+  © 2026 HotelPro. All rights reserved.
+</footer>
+
+<script>
+  // Mobile sidebar
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  hamburgerBtn.addEventListener("click", () => { sidebar.classList.toggle("translate-x-0"); overlay.classList.toggle("hidden"); });
+  overlay.addEventListener("click", () => { sidebar.classList.remove("translate-x-0"); overlay.classList.add("hidden"); });
+
+  // Payments data
+  let payments = [];
+  const paymentsTable = document.getElementById("paymentsTable");
+  const totalPayments = document.getElementById("totalPayments");
+  const totalRevenue = document.getElementById("totalRevenue");
+  const pendingPayments = document.getElementById("pendingPayments");
+  const overduePayments = document.getElementById("overduePayments");
+
+  function updatePaymentsDashboard() {
+    totalPayments.textContent = payments.length;
+    const revenue = payments.reduce((sum,p)=>sum+p.amount,0);
+    totalRevenue.textContent = new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR'}).format(revenue);
+
+    const pending = payments.filter(p=>p.status==='Pending').length;
+    const overdue = payments.filter(p=>p.status==='Overdue').length;
+    pendingPayments.textContent = pending;
+    overduePayments.textContent = overdue;
+
+    paymentsTable.innerHTML = '';
+    payments.forEach((p,index)=>{
+      const row = document.createElement('tr');
+      row.innerHTML=`
+        <td class="border px-4 py-2"><input type="text" value="${p.guest}" class="border p-1 rounded w-full guestInput"></td>
+        <td class="border px-4 py-2"><input type="text" value="${p.room}" class="border p-1 rounded w-full roomInput"></td>
+        <td class="border px-4 py-2"><input type="text" value="${p.bookingDates}" class="border p-1 rounded w-full datesInput"></td>
+        <td class="border px-4 py-2"><input type="number" value="${p.amount}" class="border p-1 rounded w-full amountInput"></td>
+        <td class="border px-4 py-2">
+          <select class="border p-1 rounded methodSelect">
+            <option ${p.paymentMethod==='Cash'?'selected':''}>Cash</option>
+            <option ${p.paymentMethod==='Card'?'selected':''}>Card</option>
+            <option ${p.paymentMethod==='Online'?'selected':''}>Online</option>
+          </select>
+        </td>
+        <td class="border px-4 py-2">
+          <select class="border p-1 rounded statusSelect">
+            <option ${p.status==='Paid'?'selected':''}>Paid</option>
+            <option ${p.status==='Pending'?'selected':''}>Pending</option>
+            <option ${p.status==='Overdue'?'selected':''}>Overdue</option>
+          </select>
+        </td>
+        <td class="border px-4 py-2 flex gap-2">
+          <button class="bg-green-500 text-white px-2 py-1 rounded saveBtn">Save</button>
+          <button class="bg-red-500 text-white px-2 py-1 rounded deleteBtn">Delete</button>
+        </td>
+      `;
+      paymentsTable.appendChild(row);
+
+      row.querySelector('.deleteBtn').addEventListener('click', ()=>{
+        payments.splice(index,1);
+        updatePaymentsDashboard();
+      });
+
+      row.querySelector('.saveBtn').addEventListener('click', ()=>{
+        p.guest = row.querySelector('.guestInput').value;
+        p.room = row.querySelector('.roomInput').value;
+        p.bookingDates = row.querySelector('.datesInput').value;
+        p.amount = parseFloat(row.querySelector('.amountInput').value);
+        p.paymentMethod = row.querySelector('.methodSelect').value;
+        p.status = row.querySelector('.statusSelect').value;
+        updatePaymentsDashboard();
+      });
+    });
+  }
+
+  document.getElementById("paymentForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    const guest = document.getElementById("guestName").value;
+    const room = document.getElementById("roomNumber").value;
+    const bookingDates = document.getElementById("bookingDates").value;
+    const amount = parseFloat(document.getElementById("amount").value);
+    const paymentMethod = document.getElementById("paymentMethod").value;
+    const status = document.getElementById("status").value;
+
+    payments.push({guest, room, bookingDates, amount, paymentMethod, status});
+    e.target.reset();
+    updatePaymentsDashboard();
+  });
+
+</script>
+
+</body>
+</html>
