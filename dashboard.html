@@ -58,38 +58,75 @@
     </div>
   </div>
 
-  <!-- Bookings Table -->
-  <div class="bg-white shadow rounded p-4 mb-6 overflow-x-auto">
-    <h3 class="text-lg font-bold mb-4">Recent Bookings</h3>
-    <table class="w-full table-auto text-left">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="px-4 py-2">Guest Name</th>
-          <th class="px-4 py-2">Room #</th>
-          <th class="px-4 py-2">Check-in</th>
-          <th class="px-4 py-2">Status</th>
-          <th class="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="bookingsTable"></tbody>
-    </table>
-  </div>
+ <!-- Bookings Table -->
+<div class="bg-white shadow rounded p-4 mb-6 overflow-x-auto">
+  <h3 class="text-lg font-bold mb-4">Recent Bookings</h3>
+  <table class="w-full table-auto text-left">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Guest Name</th>
+        <th class="px-4 py-2">Room #</th>
+        <th class="px-4 py-2">Check-in</th>
+        <th class="px-4 py-2">Check-out</th>
+        <th class="px-4 py-2">Guests</th>
+        <th class="px-4 py-2">Room Type</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Special Requests</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="bookingsTable"></tbody>
+  </table>
+</div>
 
-  <!-- Add Booking Form -->
-  <div class="bg-white shadow rounded p-4 mb-6">
-    <h3 class="text-lg font-bold mb-4">Add New Booking</h3>
-    <form id="bookingForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <input type="text" id="guestName" placeholder="Guest Name" class="p-2 border rounded w-full" required>
-      <input type="text" id="roomNumber" placeholder="Room #" class="p-2 border rounded w-full" required>
-      <input type="date" id="checkInDate" class="p-2 border rounded w-full" required>
-      <select id="status" class="p-2 border rounded w-full">
-        <option>Confirmed</option>
-        <option>Pending</option>
-        <option>Cancelled</option>
-      </select>
-      <button type="submit" class="col-span-1 sm:col-span-2 lg:col-span-4 bg-blue-500 text-white p-2 rounded">Add Booking</button>
-    </form>
-  </div>
+<!-- Add Booking Form -->
+<div class="bg-white shadow rounded p-6 mb-6">
+  <h3 class="text-lg font-bold mb-4">Add New Booking</h3>
+  <form id="bookingForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <input type="text" id="guestName" placeholder="Guest Name" class="p-2 border rounded w-full" required>
+
+    <input type="text" id="roomNumber" placeholder="Room #" class="p-2 border rounded w-full" required>
+
+    <!-- Check-in Date with label -->
+    <div class="relative">
+      <input type="date" id="checkInDate" class="p-3 border rounded w-full cursor-pointer focus:ring-2 focus:ring-blue-400 peer" required>
+      <label for="checkInDate" class="absolute left-3 top-3 text-gray-400 pointer-events-none transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-500">
+        Select Check-in Date
+      </label>
+    </div>
+
+    <!-- Check-out Date with label -->
+    <div class="relative">
+      <input type="date" id="checkOutDate" class="p-3 border rounded w-full cursor-pointer focus:ring-2 focus:ring-blue-400 peer" required>
+      <label for="checkOutDate" class="absolute left-3 top-3 text-gray-400 pointer-events-none transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-500">
+        Select Check-out Date
+      </label>
+    </div>
+
+    <input type="number" id="numGuests" placeholder="Number of Guests" min="1" class="p-2 border rounded w-full">
+
+    <select id="roomType" class="p-2 border rounded w-full">
+      <option value="">Select Room Type</option>
+      <option>Single</option>
+      <option>Double</option>
+      <option>Suite</option>
+    </select>
+
+    <select id="status" class="p-2 border rounded w-full">
+      <option>Confirmed</option>
+      <option>Pending</option>
+      <option>Cancelled</option>
+    </select>
+
+    <textarea id="specialRequests" placeholder="Special Requests" class="p-2 border rounded w-full col-span-1 sm:col-span-2 lg:col-span-4"></textarea>
+
+    <button type="submit" class="col-span-1 sm:col-span-2 lg:col-span-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
+      Add Booking
+    </button>
+
+  </form>
+</div>
 
   <!-- Revenue Chart -->
   <div class="bg-white shadow rounded p-4">
@@ -104,90 +141,119 @@
 </footer>
 
 <script>
-  // Mobile sidebar
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  hamburgerBtn.addEventListener("click", () => { sidebar.classList.toggle("translate-x-0"); overlay.classList.toggle("hidden"); });
-  overlay.addEventListener("click", () => { sidebar.classList.remove("translate-x-0"); overlay.classList.add("hidden"); });
+// Dashboard data
+let bookings = [];
+const bookingsTable = document.getElementById("bookingsTable");
+const totalGuests = document.getElementById("totalGuests");
+const activeBookings = document.getElementById("activeBookings");
+const monthlyRevenue = document.getElementById("monthlyRevenue");
+const occupancyRate = document.getElementById("occupancyRate");
 
-  // Dashboard data
-  let bookings = [];
-  const bookingsTable = document.getElementById("bookingsTable");
-  const totalGuests = document.getElementById("totalGuests");
-  const activeBookings = document.getElementById("activeBookings");
-  const monthlyRevenue = document.getElementById("monthlyRevenue");
-  const occupancyRate = document.getElementById("occupancyRate");
+// Chart setup
+const ctx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: 'Revenue (R)',
+      data: [],
+      borderColor: 'rgb(59,130,246)',
+      backgroundColor: 'rgba(59,130,246,0.2)',
+      tension: 0.3,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } }
+  }
+});
 
-  // Chart
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  const revenueChart = new Chart(ctx, {
-    type:'line',
-    data:{ labels:[], datasets:[{label:'Revenue (R)', data:[], borderColor:'rgb(59,130,246)', backgroundColor:'rgba(59,130,246,0.2)', tension:0.3, fill:true }]},
-    options:{responsive:true, plugins:{legend:{display:false}}}
-  });
+// Update dashboard function
+function updateDashboard() {
+  totalGuests.textContent = bookings.length;
+  const active = bookings.filter(b => b.status !== 'Cancelled').length;
+  activeBookings.textContent = active;
+  const revenue = bookings.reduce((sum, b) => sum + b.revenue, 0);
+  monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(revenue);
+  occupancyRate.textContent = Math.min(100, Math.round((active / 10) * 100)) + '%';
 
-  function updateDashboard() {
-    totalGuests.textContent = bookings.length;
-    const active = bookings.filter(b=>b.status!=='Cancelled').length;
-    activeBookings.textContent = active;
-    const revenue = bookings.reduce((sum,b)=>sum+b.revenue,0);
-    monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR'}).format(revenue);
-    occupancyRate.textContent = Math.min(100,Math.round((active/10)*100))+'%';
+  bookingsTable.innerHTML = '';
 
-    bookingsTable.innerHTML='';
-    bookings.forEach((b,index)=>{
-      const row = document.createElement('tr');
-      row.innerHTML=`
-        <td class="border px-4 py-2"><input type="text" value="${b.guest}" class="border p-1 rounded w-full guestInput"></td>
-        <td class="border px-4 py-2"><input type="text" value="${b.room}" class="border p-1 rounded w-full roomInput"></td>
-        <td class="border px-4 py-2"><input type="date" value="${b.checkin}" class="border p-1 rounded w-full dateInput"></td>
-        <td class="border px-4 py-2">
-          <select class="border p-1 rounded statusSelect">
-            <option ${b.status==='Confirmed'?'selected':''}>Confirmed</option>
-            <option ${b.status==='Pending'?'selected':''}>Pending</option>
-            <option ${b.status==='Cancelled'?'selected':''}>Cancelled</option>
-          </select>
-        </td>
-        <td class="border px-4 py-2 flex gap-2">
-          <button class="bg-green-500 text-white px-2 py-1 rounded saveBtn">Save</button>
-          <button class="bg-red-500 text-white px-2 py-1 rounded deleteBtn">Delete</button>
-        </td>
-      `;
-      bookingsTable.appendChild(row);
+  bookings.forEach((b, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="border px-4 py-2"><input type="text" value="${b.guest}" class="border p-1 rounded w-full guestInput"></td>
+      <td class="border px-4 py-2"><input type="text" value="${b.room}" class="border p-1 rounded w-full roomInput"></td>
+      <td class="border px-4 py-2"><input type="date" value="${b.checkin}" class="border p-1 rounded w-full checkinInput"></td>
+      <td class="border px-4 py-2"><input type="date" value="${b.checkout}" class="border p-1 rounded w-full checkoutInput"></td>
+      <td class="border px-4 py-2"><input type="number" value="${b.numGuests}" class="border p-1 rounded w-full numGuestsInput"></td>
+      <td class="border px-4 py-2">
+        <select class="border p-1 rounded roomTypeSelect">
+          <option ${b.roomType==='Single'?'selected':''}>Single</option>
+          <option ${b.roomType==='Double'?'selected':''}>Double</option>
+          <option ${b.roomType==='Suite'?'selected':''}>Suite</option>
+        </select>
+      </td>
+      <td class="border px-4 py-2">
+        <select class="border p-1 rounded statusSelect">
+          <option ${b.status==='Confirmed'?'selected':''}>Confirmed</option>
+          <option ${b.status==='Pending'?'selected':''}>Pending</option>
+          <option ${b.status==='Cancelled'?'selected':''}>Cancelled</option>
+        </select>
+      </td>
+      <td class="border px-4 py-2"><input type="text" value="${b.specialRequests}" class="border p-1 rounded w-full specialRequestsInput"></td>
+      <td class="border px-4 py-2 flex gap-2">
+        <button class="bg-green-500 text-white px-2 py-1 rounded saveBtn">Save</button>
+        <button class="bg-red-500 text-white px-2 py-1 rounded deleteBtn">Delete</button>
+      </td>
+    `;
+    bookingsTable.appendChild(row);
 
-      row.querySelector('.deleteBtn').addEventListener('click',()=>{
-        bookings.splice(index,1);
-        updateDashboard();
-      });
-
-      row.querySelector('.saveBtn').addEventListener('click',()=>{
-        b.guest=row.querySelector('.guestInput').value;
-        b.room=row.querySelector('.roomInput').value;
-        b.checkin=row.querySelector('.dateInput').value;
-        b.status=row.querySelector('.statusSelect').value;
-        updateDashboard();
-      });
+    // Save changes
+    row.querySelector('.saveBtn').addEventListener('click', () => {
+      b.guest = row.querySelector('.guestInput').value;
+      b.room = row.querySelector('.roomInput').value;
+      b.checkin = row.querySelector('.checkinInput').value;
+      b.checkout = row.querySelector('.checkoutInput').value;
+      b.numGuests = row.querySelector('.numGuestsInput').value;
+      b.roomType = row.querySelector('.roomTypeSelect').value;
+      b.status = row.querySelector('.statusSelect').value;
+      b.specialRequests = row.querySelector('.specialRequestsInput').value;
+      updateDashboard();
     });
 
-    // Update chart
-    revenueChart.data.labels = bookings.map(b=>b.checkin);
-    revenueChart.data.datasets[0].data = bookings.map(b=>b.revenue);
-    revenueChart.update();
-  }
-
-  document.getElementById("bookingForm").addEventListener("submit", e=>{
-    e.preventDefault();
-    const guest = document.getElementById("guestName").value;
-    const room = document.getElementById("roomNumber").value;
-    const checkin = document.getElementById("checkInDate").value;
-    const status = document.getElementById("status").value;
-    const revenue = Math.floor(Math.random()*3000)+500;
-
-    bookings.push({guest, room, checkin, status, revenue});
-    e.target.reset();
-    updateDashboard();
+    // Delete booking
+    row.querySelector('.deleteBtn').addEventListener('click', () => {
+      bookings.splice(index, 1);
+      updateDashboard();
+    });
   });
+
+  // Update chart
+  revenueChart.data.labels = bookings.map(b => b.checkin);
+  revenueChart.data.datasets[0].data = bookings.map(b => b.revenue);
+  revenueChart.update();
+}
+
+// Form submit
+document.getElementById("bookingForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const guest = document.getElementById("guestName").value;
+  const room = document.getElementById("roomNumber").value;
+  const checkin = document.getElementById("checkInDate").value;
+  const checkout = document.getElementById("checkOutDate").value;
+  const numGuests = document.getElementById("numGuests").value || 1;
+  const roomType = document.getElementById("roomType").value;
+  const status = document.getElementById("status").value;
+  const specialRequests = document.getElementById("specialRequests").value;
+  const revenue = Math.floor(Math.random() * 3000) + 500;
+
+  bookings.push({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
+  e.target.reset();
+  updateDashboard();
+});
 </script>
 
 <script src="hamburger.js"></script>
