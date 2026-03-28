@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelPro - Bookings</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Navbar -->
+<header class="bg-white shadow fixed w-full z-50 top-0 h-16 flex items-center px-4">
+  <div class="flex items-center">
+    <button id="hamburgerBtn" class="text-2xl mr-3 md:hidden">☰</button>
+    <img src="logo.png" alt="Logo" class="h-10 w-10 mr-2">
+    <h1 class="text-xl font-bold">Bookings</h1>
+  </div>
+  <div class="ml-auto">
+    <a href="dashboard.html" class="bg-gray-500 text-white px-3 py-1 rounded mr-2">Dashboard</a>
+    <button class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:relative z-40">
+  <nav class="pt-16 p-4 space-y-3">
+    <a href="dashboard.html" class="block p-2 rounded hover:bg-gray-200">Dashboard</a>
+    <a href="bookings.html" class="block p-2 rounded hover:bg-gray-200 bg-gray-200 font-bold">Bookings</a>
+    <a href="rooms.html" class="block p-2 rounded hover:bg-gray-200">Rooms</a>
+    <a href="payments.html" class="block p-2 rounded hover:bg-gray-200">Payments</a>
+    <a href="reports.html" class="block p-2 rounded hover:bg-gray-200">Reports</a>
+    <a href="settings.html" class="block p-2 rounded hover:bg-gray-200">Settings</a>
+  </nav>
+</aside>
+
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-30 md:hidden"></div>
+
+<main class="flex-1 p-6 mt-16 md:mt-0 md:ml-64">
+
+  <!-- Add Booking Form -->
+  <div class="bg-white shadow rounded p-6 mb-6">
+    <h3 class="text-lg font-bold mb-4">Add New Booking</h3>
+    <form id="bookingForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <input type="text" id="guestName" placeholder="Guest Name" class="p-2 border rounded w-full" required>
+      <input type="text" id="roomNumber" placeholder="Room #" class="p-2 border rounded w-full" required>
+      <input type="date" id="checkInDate" class="p-2 border rounded w-full" required>
+      <input type="date" id="checkOutDate" class="p-2 border rounded w-full" required>
+      <input type="number" id="numGuests" placeholder="Number of Guests" min="1" class="p-2 border rounded w-full">
+      <select id="roomType" class="p-2 border rounded w-full">
+        <option value="">Select Room Type</option>
+        <option>Single</option>
+        <option>Double</option>
+        <option>Suite</option>
+      </select>
+      <select id="status" class="p-2 border rounded w-full">
+        <option>Confirmed</option>
+        <option>Pending</option>
+        <option>Cancelled</option>
+      </select>
+      <textarea id="specialRequests" placeholder="Special Requests" class="p-2 border rounded w-full col-span-1 sm:col-span-2 lg:col-span-4"></textarea>
+      <button type="submit" class="col-span-1 sm:col-span-2 lg:col-span-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
+        Add Booking
+      </button>
+    </form>
+  </div>
+
+  <!-- Bookings Table -->
+  <div class="bg-white shadow rounded p-4 mb-6 overflow-x-auto">
+    <h3 class="text-lg font-bold mb-4">All Bookings</h3>
+    <table class="w-full table-auto text-left">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2">Guest Name</th>
+          <th class="px-4 py-2">Room #</th>
+          <th class="px-4 py-2">Check-in</th>
+          <th class="px-4 py-2">Check-out</th>
+          <th class="px-4 py-2">Guests</th>
+          <th class="px-4 py-2">Room Type</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Special Requests</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bookingsTable"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+  // Mobile sidebar toggle
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  hamburgerBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("translate-x-0");
+    overlay.classList.toggle("hidden");
+  });
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("translate-x-0");
+    overlay.classList.add("hidden");
+  });
+
+  // Load bookings from localStorage
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  const bookingsTable = document.getElementById("bookingsTable");
+
+  function saveToLocal() {
+    localStorage.setItem("bookings", JSON.stringify(bookings));
+  }
+
+  function updateBookingsTable() {
+    bookingsTable.innerHTML = "";
+    bookings.forEach((b, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" value="${b.guest}" class="w-full guestInput"></td>
+        <td><input type="text" value="${b.room}" class="w-full roomInput"></td>
+        <td><input type="date" value="${b.checkIn}" class="w-full checkInInput"></td>
+        <td><input type="date" value="${b.checkOut}" class="w-full checkOutInput"></td>
+        <td><input type="number" value="${b.guests}" class="w-full guestsInput" min="1"></td>
+        <td>
+          <select class="roomTypeSelect">
+            <option ${b.roomType==='Single'?'selected':''}>Single</option>
+            <option ${b.roomType==='Double'?'selected':''}>Double</option>
+            <option ${b.roomType==='Suite'?'selected':''}>Suite</option>
+          </select>
+        </td>
+        <td>
+          <select class="statusSelect">
+            <option ${b.status==='Confirmed'?'selected':''}>Confirmed</option>
+            <option ${b.status==='Pending'?'selected':''}>Pending</option>
+            <option ${b.status==='Cancelled'?'selected':''}>Cancelled</option>
+          </select>
+        </td>
+        <td><input type="text" value="${b.requests}" class="w-full requestsInput"></td>
+        <td class="flex gap-2">
+          <button class="saveBtn bg-green-500 text-white px-2 py-1 rounded">Save</button>
+          <button class="deleteBtn bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+        </td>
+      `;
+      bookingsTable.appendChild(row);
+
+      // Save updates
+      row.querySelector(".saveBtn").addEventListener("click", () => {
+        b.guest = row.querySelector(".guestInput").value;
+        b.room = row.querySelector(".roomInput").value;
+        b.checkIn = row.querySelector(".checkInInput").value;
+        b.checkOut = row.querySelector(".checkOutInput").value;
+        b.guests = row.querySelector(".guestsInput").value;
+        b.roomType = row.querySelector(".roomTypeSelect").value;
+        b.status = row.querySelector(".statusSelect").value;
+        b.requests = row.querySelector(".requestsInput").value;
+        saveToLocal();
+        alert("Booking updated!");
+      });
+
+      // Delete booking
+      row.querySelector(".deleteBtn").addEventListener("click", () => {
+        bookings.splice(i, 1);
+        saveToLocal();
+        updateBookingsTable();
+      });
+    });
+  }
+
+  // Add booking
+  document.getElementById("bookingForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const guest = document.getElementById("guestName").value;
+    const room = document.getElementById("roomNumber").value;
+    const checkIn = document.getElementById("checkInDate").value;
+    const checkOut = document.getElementById("checkOutDate").value;
+    const guestsNum = document.getElementById("numGuests").value || 1;
+    const roomType = document.getElementById("roomType").value || '';
+    const status = document.getElementById("status").value;
+    const requests = document.getElementById("specialRequests").value || '';
+
+    bookings.push({guest, room, checkIn, checkOut, guests: guestsNum, roomType, status, requests});
+    saveToLocal();
+    e.target.reset();
+    updateBookingsTable();
+  });
+
+  // Initialize table on page load
+  updateBookingsTable();
+</script>
+
+
+</body>
+</html>
