@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelPro Rooms</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Navbar -->
+<header class="bg-white shadow fixed w-full z-50 top-0 h-16 flex items-center px-4">
+  <div class="flex items-center">
+    <button id="hamburgerBtn" class="text-2xl mr-3 md:hidden">☰</button>
+    <img src="logo.png" alt="Logo" class="h-10 w-10 mr-2">
+    <h1 class="text-xl font-bold">HotelPro Rooms</h1>
+  </div>
+  <div class="ml-auto">
+    <button class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:relative z-40">
+  <nav class="pt-16 p-4 space-y-3">
+    <a href="dashboard.html" class="block p-2 rounded hover:bg-gray-200">Dashboard</a>
+    <a href="bookings.html" class="block p-2 rounded hover:bg-gray-200">Bookings</a>
+    <a href="rooms.html" class="block p-2 rounded hover:bg-gray-200 font-bold bg-gray-200">Rooms</a>
+    <a href="#" class="block p-2 rounded hover:bg-gray-200">Payments</a>
+    <a href="#" class="block p-2 rounded hover:bg-gray-200">Reports</a>
+    <a href="#" class="block p-2 rounded hover:bg-gray-200">Settings</a>
+  </nav>
+</aside>
+
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-30 md:hidden"></div>
+
+<main class="flex-1 p-6 mt-16 md:mt-0 md:ml-64">
+
+  <!-- Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Total Rooms</p>
+      <h2 id="totalRooms" class="text-2xl font-bold">0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Available</p>
+      <h2 id="availableRooms" class="text-2xl font-bold">0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Occupied</p>
+      <h2 id="occupiedRooms" class="text-2xl font-bold">0</h2>
+    </div>
+    <div class="bg-white shadow rounded p-4">
+      <p class="text-gray-500">Maintenance</p>
+      <h2 id="maintenanceRooms" class="text-2xl font-bold">0</h2>
+    </div>
+  </div>
+
+  <!-- Rooms Table -->
+  <div class="bg-white shadow rounded p-4 mb-6 overflow-x-auto">
+    <h3 class="text-lg font-bold mb-4">Room List</h3>
+    <table class="w-full table-auto text-left">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2">Room #</th>
+          <th class="px-4 py-2">Type</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Price/Night</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="roomsTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Add/Edit Room Form -->
+  <div class="bg-white shadow rounded p-6 mb-6">
+    <h3 class="text-lg font-bold mb-4">Add / Edit Room</h3>
+    <form id="roomForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <input type="text" id="roomNumber" placeholder="Room #" class="p-2 border rounded w-full" required>
+      <select id="roomType" class="p-2 border rounded w-full" required>
+        <option value="">Select Room Type</option>
+        <option>Single</option>
+        <option>Double</option>
+        <option>Suite</option>
+      </select>
+      <select id="status" class="p-2 border rounded w-full" required>
+        <option>Available</option>
+        <option>Occupied</option>
+        <option>Maintenance</option>
+      </select>
+      <input type="number" id="pricePerNight" placeholder="Price per Night" min="0" class="p-2 border rounded w-full" required>
+      <button type="submit" class="col-span-1 sm:col-span-2 lg:col-span-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
+        Add / Save Room
+      </button>
+    </form>
+  </div>
+
+</main>
+
+<footer class="bg-white text-center p-4 mt-6 shadow">
+  © 2026 HotelPro. All rights reserved.
+</footer>
+
+<script>
+  // Mobile sidebar toggle
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  hamburgerBtn.addEventListener("click", () => { 
+    sidebar.classList.toggle("translate-x-0"); 
+    overlay.classList.toggle("hidden"); 
+  });
+  overlay.addEventListener("click", () => { 
+    sidebar.classList.remove("translate-x-0"); 
+    overlay.classList.add("hidden"); 
+  });
+
+  // Rooms data
+  let rooms = [];
+  const roomsTable = document.getElementById("roomsTable");
+  const totalRooms = document.getElementById("totalRooms");
+  const availableRooms = document.getElementById("availableRooms");
+  const occupiedRooms = document.getElementById("occupiedRooms");
+  const maintenanceRooms = document.getElementById("maintenanceRooms");
+
+  function updateRoomsDashboard() {
+    totalRooms.textContent = rooms.length;
+    availableRooms.textContent = rooms.filter(r => r.status==='Available').length;
+    occupiedRooms.textContent = rooms.filter(r => r.status==='Occupied').length;
+    maintenanceRooms.textContent = rooms.filter(r => r.status==='Maintenance').length;
+
+    roomsTable.innerHTML = '';
+    rooms.forEach((r, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-4 py-2"><input type="text" value="${r.number}" class="border p-1 rounded w-full roomNumberInput"></td>
+        <td class="border px-4 py-2">
+          <select class="border p-1 rounded roomTypeSelect">
+            <option ${r.type==='Single'?'selected':''}>Single</option>
+            <option ${r.type==='Double'?'selected':''}>Double</option>
+            <option ${r.type==='Suite'?'selected':''}>Suite</option>
+          </select>
+        </td>
+        <td class="border px-4 py-2">
+          <select class="border p-1 rounded statusSelect">
+            <option ${r.status==='Available'?'selected':''}>Available</option>
+            <option ${r.status==='Occupied'?'selected':''}>Occupied</option>
+            <option ${r.status==='Maintenance'?'selected':''}>Maintenance</option>
+          </select>
+        </td>
+        <td class="border px-4 py-2"><input type="number" value="${r.price}" class="border p-1 rounded w-full priceInput"></td>
+        <td class="border px-4 py-2 flex gap-2">
+          <button class="bg-green-500 text-white px-2 py-1 rounded saveBtn">Save</button>
+          <button class="bg-red-500 text-white px-2 py-1 rounded deleteBtn">Delete</button>
+        </td>
+      `;
+      roomsTable.appendChild(row);
+
+      row.querySelector('.deleteBtn').addEventListener('click', () => {
+        rooms.splice(index,1);
+        updateRoomsDashboard();
+      });
+
+      row.querySelector('.saveBtn').addEventListener('click', () => {
+        r.number = row.querySelector('.roomNumberInput').value;
+        r.type = row.querySelector('.roomTypeSelect').value;
+        r.status = row.querySelector('.statusSelect').value;
+        r.price = parseFloat(row.querySelector('.priceInput').value);
+        updateRoomsDashboard();
+      });
+    });
+  }
+
+  document.getElementById("roomForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const number = document.getElementById("roomNumber").value;
+    const type = document.getElementById("roomType").value;
+    const status = document.getElementById("status").value;
+    const price = parseFloat(document.getElementById("pricePerNight").value);
+
+    rooms.push({number,type,status,price});
+    e.target.reset();
+    updateRoomsDashboard();
+  });
+</script>
+
+</body>
+</html>
