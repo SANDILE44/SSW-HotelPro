@@ -1,6 +1,6 @@
 /* style.css */
 
-/* Global styles */
+/* ---------------- Global ---------------- */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f3f4f6;
@@ -8,20 +8,20 @@ body {
   padding: 0;
 }
 
-/* Navbar */
+/* ---------------- Navbar ---------------- */
 header {
-  background-color: #ffffff;
+  background-color: #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1rem;
   position: relative;
   z-index: 1000;
 }
 
 header h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
 }
 
@@ -33,7 +33,7 @@ header img {
 
 header button {
   background-color: #ef4444;
-  color: #ffffff;
+  color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
@@ -45,8 +45,9 @@ header button:hover {
   background-color: #dc2626;
 }
 
-/* Hamburger button */
+/* Hamburger */
 .hamburger {
+  font-size: 1.5rem;
   display: inline-block;
   cursor: pointer;
 }
@@ -57,16 +58,16 @@ header button:hover {
   }
 }
 
-/* Sidebar */
+/* ---------------- Sidebar ---------------- */
 aside {
-  background-color: #ffffff;
+  background-color: #fff;
   width: 250px;
-  min-height: 100vh;
-  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
-  padding: 1rem;
+  height: 100%;
   position: fixed;
   top: 0;
-  left: -260px; /* hidden by default */
+  left: -260px;
+  padding: 1rem;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
   transition: left 0.3s ease;
   z-index: 900;
 }
@@ -89,30 +90,30 @@ aside nav a:hover {
   background-color: #e5e7eb;
 }
 
-/* Main content */
+/* ---------------- Main Content ---------------- */
 main {
   flex: 1;
-  padding: 2rem;
+  padding: 1rem;
   margin-left: 0;
   transition: margin-left 0.3s ease;
 }
 
 main.shifted {
-  margin-left: 250px; /* shift when sidebar opens */
+  margin-left: 250px;
 }
 
-/* Cards */
+/* ---------------- Cards ---------------- */
 .grid {
   display: grid;
   gap: 1rem;
 }
 
 .grid-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr; /* mobile-first */
 }
 
 .bg-white {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
 .shadow {
@@ -140,7 +141,7 @@ main.shifted {
   font-weight: bold;
 }
 
-/* Table */
+/* ---------------- Table ---------------- */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -156,7 +157,7 @@ table th {
   text-align: left;
 }
 
-/* Form inputs */
+/* ---------------- Form ---------------- */
 input, select {
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -171,15 +172,9 @@ input:focus, select:focus {
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
-/* Add Booking Form */
 #bookingForm {
   display: grid;
   gap: 1rem;
-}
-
-#bookingForm input,
-#bookingForm select {
-  width: 100%;
 }
 
 #bookingForm button {
@@ -188,7 +183,6 @@ input:focus, select:focus {
   border: none;
   padding: 0.5rem;
   border-radius: 0.375rem;
-  grid-column: span 1;
   transition: background 0.2s;
 }
 
@@ -196,33 +190,36 @@ input:focus, select:focus {
   background-color: #2563eb;
 }
 
-@media(min-width: 768px) {
-  #bookingForm {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  #bookingForm button {
-    grid-column: span 4;
-  }
-}
-
-/* Footer */
+/* ---------------- Footer ---------------- */
 footer {
-  background-color: #ffffff;
+  background-color: #fff;
   text-align: center;
   padding: 1rem;
   box-shadow: 0 -1px 4px rgba(0,0,0,0.05);
   margin-top: 2rem;
 }
 
-/* Responsive grid */
-@media (max-width: 1024px) {
+/* ---------------- Responsive ---------------- */
+@media(min-width: 640px) {
   .grid-cols-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media(min-width: 1024px) {
   .grid-cols-4 {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  #bookingForm {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  #bookingForm button {
+    grid-column: span 4;
+  }
+
+  main {
+    padding: 2rem;
   }
 }
