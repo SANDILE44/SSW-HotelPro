@@ -1,0 +1,207 @@
+/* style.css */
+
+/* Global styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f3f4f6; /* Light gray */
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar */
+header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+header img {
+  height: 40px;
+  width: 40px;
+  margin-right: 0.75rem;
+}
+
+header button {
+  background-color: #ef4444; /* red-500 */
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+header button:hover {
+  background-color: #dc2626; /* red-600 */
+}
+
+/* Sidebar */
+aside {
+  background-color: #ffffff;
+  width: 250px;
+  min-height: 100vh;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+  padding: 1rem;
+}
+
+aside nav a {
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  color: #111827; /* gray-900 */
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s;
+}
+
+aside nav a:hover {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+/* Main content */
+main {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* Cards */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.shadow {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.rounded {
+  border-radius: 0.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+table th {
+  background-color: #f9fafb; /* gray-100 */
+  text-align: left;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+}
+
+.deleteBtn {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
+}
+
+.deleteBtn:hover {
+  background-color: #dc2626;
+}
+
+/* Form inputs */
+input, select {
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Add Booking Form */
+#bookingForm {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+#bookingForm button {
+  grid-column: span 4;
+  background-color: #3b82f6; /* blue-500 */
+  color: #ffffff;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  border: none;
+  transition: background 0.2s;
+}
+
+#bookingForm button:hover {
+  background-color: #2563eb; /* blue-600 */
+}
+
+/* Footer */
+footer {
+  background-color: #ffffff;
+  text-align: center;
+  padding: 1rem;
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.05);
+  margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+  aside {
+    display: none; /* hide sidebar on mobile */
+  }
+}
