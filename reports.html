@@ -107,18 +107,7 @@
     overlay.classList.add("hidden");
   });
 
-  // Demo data
-  let bookings = [
-    {guest:"John Doe", room:"101", checkin:"2026-03-01", checkout:"2026-03-05", numGuests:2, roomType:"Double", status:"Confirmed", revenue:1200},
-    {guest:"Jane Smith", room:"102", checkin:"2026-03-02", checkout:"2026-03-04", numGuests:1, roomType:"Single", status:"Pending", revenue:800},
-    {guest:"Bob Brown", room:"103", checkin:"2026-03-03", checkout:"2026-03-06", numGuests:3, roomType:"Suite", status:"Cancelled", revenue:2000},
-  ];
-
-  let payments = [
-    {guest:"John Doe", room:"101", bookingDates:"2026-03-01", amount:1200, paymentMethod:"Card", status:"Paid"},
-    {guest:"Jane Smith", room:"102", bookingDates:"2026-03-02", amount:800, paymentMethod:"Cash", status:"Pending"},
-  ];
-
+  // Elements
   const totalBookingsEl = document.getElementById("totalBookings");
   const totalRevenueReportsEl = document.getElementById("totalRevenueReports");
   const pendingPaymentsReportsEl = document.getElementById("pendingPaymentsReports");
@@ -141,6 +130,7 @@
   });
 
   function updateReportsDashboard() {
+    // ✅ Use bookings and payments from data.js only
     totalBookingsEl.textContent = bookings.length;
     const totalRevenue = bookings.reduce((sum,b)=>sum+b.revenue,0);
     totalRevenueReportsEl.textContent = new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR'}).format(totalRevenue);
@@ -178,6 +168,7 @@
     });
   }
 
+  // Initial dashboard render
   updateReportsDashboard();
 </script>
 
