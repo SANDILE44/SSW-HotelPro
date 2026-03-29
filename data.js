@@ -159,3 +159,26 @@ return { total, available, occupied, maintenance };
 }
 
 // ------------------- END -------------------
+
+
+function applyGlobalSettings(){
+
+// update logo everywhere
+const logos = document.querySelectorAll("#navLogo, .navLogo");
+
+logos.forEach(logo=>{
+if(hotelSettings.logo){
+logo.src = hotelSettings.logo;
+}
+});
+
+// theme
+if(hotelSettings.theme === "dark"){
+document.body.classList.remove("bg-gray-100");
+document.body.classList.add("bg-gray-900","text-white");
+}
+
+}
+
+// run
+applyGlobalSettings();
