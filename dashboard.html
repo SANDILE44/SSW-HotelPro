@@ -157,39 +157,37 @@ Dashboard
 <script src="data.js"></script>
 
 <script>
-// Grab DOM elements
+// ---------------- DOM ELEMENTS ----------------
 const bookingsTable = document.getElementById("bookingsTable");
 const totalGuests = document.getElementById("totalGuests");
 const activeBookings = document.getElementById("activeBookings");
 const monthlyRevenue = document.getElementById("monthlyRevenue");
 const occupancyRate = document.getElementById("occupancyRate");
 const bookingForm = document.getElementById("bookingForm");
+let editIndex = null;
 
-let editIndex = null; // Track which booking is being edited
-
-// ==================== STATUS BADGES ====================
+// ---------------- STATUS BADGES ----------------
 function getStatusBadge(status) {
-  let bgColor = '', textColor = '';
-  switch(status) {
-    case 'Confirmed': bgColor='#dcfce7'; textColor='#166534'; break;
-    case 'Pending':   bgColor='#fef3c7'; textColor='#92400e'; break;
-    case 'Cancelled': bgColor='#fee2e2'; textColor='#991b1b'; break;
-    default:          bgColor='#e5e7eb'; textColor='#374151';
-  }
-  return `<span style="background:${bgColor}; color:${textColor}; padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:600;">${status}</span>`;
+  const colors = {
+    Confirmed: { bg:'#dcfce7', text:'#166534' },
+    Pending:   { bg:'#fef3c7', text:'#92400e' },
+    Cancelled: { bg:'#fee2e2', text:'#991b1b' }
+  };
+  const c = colors[status] || { bg:'#e5e7eb', text:'#374151' };
+  return `<span style="background:${c.bg}; color:${c.text}; padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:600;">${status}</span>`;
 }
 
-// ==================== DASHBOARD UPDATE ====================
+// ---------------- UPDATE DASHBOARD ----------------
 function updateDashboard() {
-  // Cards
-  totalGuests.textContent = bookings.length;
+  // CARDS
+  totalGuests.textContent = bookings.reduce((sum,b)=>sum+parseInt(b.numGuests||0),0);
   const active = bookings.filter(b => b.status !== 'Cancelled').length;
   activeBookings.textContent = active;
-  const revenue = bookings.reduce((sum,b)=>sum+b.revenue,0);
+  const revenue = bookings.reduce((sum,b)=>sum+parseFloat(b.revenue||0),0);
   monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA', { style:'currency', currency:'ZAR' }).format(revenue);
   occupancyRate.textContent = Math.min(100, Math.round((active/10)*100)) + '%';
 
-  // Table
+  // TABLE
   bookingsTable.innerHTML = '';
   bookings.forEach((b,index)=>{
     const row = document.createElement('tr');
@@ -203,27 +201,29 @@ function updateDashboard() {
       <td class="px-3 py-2">${b.roomType}</td>
       <td class="px-3 py-2 text-center">${getStatusBadge(b.status)}</td>
       <td class="px-3 py-2">${b.specialRequests}</td>
-      <td class="px-3 py-2 text-center space-x-1 flex justify-center flex-wrap gap-1">
-        <button onclick="editBooking(${index})" class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium hover:bg-blue-200 transition">Edit</button>
-        <button onclick="toggleStatus(${index})" class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium hover:bg-green-200 transition">Check</button>
-        <button onclick="deleteBookingRow(${index})" class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium hover:bg-red-200 transition">Delete</button>
+      <td class="px-3 py-2 flex gap-1 justify-center flex-wrap">
+        <button onclick="editBooking(${index})" class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs hover:bg-blue-200">Edit</button>
+        <button onclick="toggleStatus(${index})" class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs hover:bg-green-200">Check</button>
+        <button onclick="deleteBookingRow(${index})" class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs hover:bg-red-200">Delete</button>
       </td>
     `;
     bookingsTable.appendChild(row);
   });
 
-  // Save updated data
+  // SAVE TO LOCALSTORAGE
   saveData();
 
-  // Update chart if exists
+  // UPDATE CHART
   if(window.revenueChart) {
-    revenueChart.data.labels = bookings.map(b => b.checkin);
-    revenueChart.data.datasets[0].data = bookings.map(b => b.revenue);
+    const months = bookings.map(b => new Date(b.checkin).toLocaleString('default',{month:'short'}));
+    const revenues = bookings.map(b => parseFloat(b.revenue||0));
+    revenueChart.data.labels = months;
+    revenueChart.data.datasets[0].data = revenues;
     revenueChart.update();
   }
 }
 
-// ==================== EDIT BOOKING ====================
+// ---------------- EDIT BOOKING ----------------
 function editBooking(index) {
   const b = bookings[index];
   document.getElementById("guestName").value = b.guest;
@@ -232,26 +232,21 @@ function editBooking(index) {
   document.getElementById("checkOutDate").value = b.checkout;
   document.getElementById("numGuests").value = b.numGuests;
   document.getElementById("roomType").value = b.roomType;
-document.getElementById("revenue").value = b.revenue;
+  document.getElementById("revenue").value = b.revenue;
   document.getElementById("status").value = b.status;
   document.getElementById("specialRequests").value = b.specialRequests;
-
   editIndex = index;
-
-  // Scroll smoothly to form
-  bookingForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  bookingForm.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
-// ==================== TOGGLE STATUS ====================
+// ---------------- TOGGLE STATUS ----------------
 function toggleStatus(index) {
   const current = bookings[index].status;
-  if(current === 'Confirmed') bookings[index].status = 'Cancelled';
-  else if(current === 'Cancelled') bookings[index].status = 'Pending';
-  else bookings[index].status = 'Confirmed';
+  bookings[index].status = (current==='Confirmed')?'Cancelled':(current==='Cancelled'?'Pending':'Confirmed');
   updateDashboard();
 }
 
-// ==================== DELETE BOOKING ====================
+// ---------------- DELETE ----------------
 function deleteBookingRow(index) {
   if(confirm(`Delete booking for ${bookings[index].guest}?`)) {
     bookings.splice(index,1);
@@ -259,7 +254,7 @@ function deleteBookingRow(index) {
   }
 }
 
-// ==================== FORM SUBMIT ====================
+// ---------------- FORM SUBMIT ----------------
 bookingForm.addEventListener("submit", e=>{
   e.preventDefault();
   const guest = document.getElementById("guestName").value;
@@ -272,12 +267,10 @@ bookingForm.addEventListener("submit", e=>{
   const specialRequests = document.getElementById("specialRequests").value;
   const revenue = parseFloat(document.getElementById("revenue").value) || 0;
 
-  if(editIndex !== null) {
-    // Update existing booking
+  if(editIndex !== null){
     bookings[editIndex] = { guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue };
     editIndex = null;
   } else {
-    // Add new booking
     bookings.push({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
   }
 
@@ -285,7 +278,31 @@ bookingForm.addEventListener("submit", e=>{
   updateDashboard();
 });
 
-// ==================== INITIAL RENDER ====================
+// ---------------- INITIALIZE CHART ----------------
+const ctx = document.getElementById('revenueChart').getContext('2d');
+window.revenueChart = new Chart(ctx,{
+  type:'line',
+  data:{
+    labels: bookings.map(b => new Date(b.checkin).toLocaleString('default',{month:'short'})),
+    datasets:[{
+      label:'Revenue',
+      data: bookings.map(b => parseFloat(b.revenue||0)),
+      backgroundColor:'rgba(59,130,246,0.2)',
+      borderColor:'rgba(59,130,246,1)',
+      borderWidth:2,
+      tension:0.3
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{beginAtZero:true},
+    }
+  }
+});
+
+// ---------------- INITIAL RENDER ----------------
 updateDashboard();
 </script>
 
