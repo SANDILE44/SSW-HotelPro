@@ -165,34 +165,30 @@ Logout
   const monthlyRevenue = document.getElementById("monthlyRevenue");
   const occupancyRate = document.getElementById("occupancyRate");
 
-  // Chart setup remains the same
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  const revenueChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Revenue (R)',
-        data: [],
-        borderColor: 'rgb(59,130,246)',
-        backgroundColor: 'rgba(59,130,246,0.2)',
-        tension: 0.3,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
+  // Function to get badge HTML for status
+  function getStatusBadge(status) {
+    switch(status) {
+      case 'Confirmed':
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold" style="background:#dcfce7; color:#166534;">Confirmed</span>`;
+      case 'Pending':
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold" style="background:#fef3c7; color:#92400e;">Pending</span>`;
+      case 'Cancelled':
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold" style="background:#fee2e2; color:#991b1b;">Cancelled</span>`;
+      default:
+        return status;
     }
-  });
+  }
 
-  // Use the global bookings array from data.js
+  // Update the dashboard table and cards
   function updateDashboard() {
     totalGuests.textContent = bookings.length;
+
     const active = bookings.filter(b => b.status !== 'Cancelled').length;
     activeBookings.textContent = active;
+
     const revenue = bookings.reduce((sum, b) => sum + b.revenue, 0);
     monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(revenue);
+
     occupancyRate.textContent = Math.min(100, Math.round((active / 10) * 100)) + '%';
 
     bookingsTable.innerHTML = '';
@@ -205,8 +201,13 @@ Logout
         <td class="border px-4 py-2">${b.checkout}</td>
         <td class="border px-4 py-2">${b.numGuests}</td>
         <td class="border px-4 py-2">${b.roomType}</td>
-        <td class="border px-4 py-2">${b.status}</td>
+        <td class="border px-4 py-2">${getStatusBadge(b.status)}</td>
         <td class="border px-4 py-2">${b.specialRequests}</td>
+        <td class="border px-4 py-2 space-x-1">
+          <button onclick="editBooking(${index})" class="text-blue-600 hover:underline">Edit</button>
+          <button onclick="toggleStatus(${index})" class="text-green-600 hover:underline">Check</button>
+          <button onclick="deleteBookingRow(${index})" class="text-red-600 hover:underline">Delete</button>
+        </td>
       `;
       bookingsTable.appendChild(row);
     });
@@ -215,6 +216,27 @@ Logout
     revenueChart.data.labels = bookings.map(b => b.checkin);
     revenueChart.data.datasets[0].data = bookings.map(b => b.revenue);
     revenueChart.update();
+  }
+
+  // Example action functions
+  function editBooking(index) {
+    alert(`Edit booking for ${bookings[index].guest}`);
+    // You can prefill the form here for editing
+  }
+
+  function toggleStatus(index) {
+    const current = bookings[index].status;
+    if(current === 'Confirmed') bookings[index].status = 'Cancelled';
+    else if(current === 'Cancelled') bookings[index].status = 'Pending';
+    else bookings[index].status = 'Confirmed';
+    updateDashboard();
+  }
+
+  function deleteBookingRow(index) {
+    if(confirm(`Delete booking for ${bookings[index].guest}?`)) {
+      bookings.splice(index, 1);
+      updateDashboard();
+    }
   }
 
   // Form submit
@@ -230,16 +252,14 @@ Logout
     const specialRequests = document.getElementById("specialRequests").value;
     const revenue = Math.floor(Math.random() * 3000) + 500;
 
-    addBooking({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
+    bookings.push({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
     e.target.reset();
     updateDashboard();
   });
 
-  // Run once on page load
+  // Initial load
   updateDashboard();
 </script>
-
-
 
 </body>
 </html>
