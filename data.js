@@ -1,11 +1,23 @@
-// ------------------- Global Data.js with localStorage -------------------
+// ------------------- data.js -------------------
 
 // ------------------- Initialize Data -------------------
 
-// Start with empty arrays, load from localStorage if available
+// Rooms with prices
+let rooms = [
+  { number: "101", type: "Single", price: 600, status: "Available" },
+  { number: "102", type: "Double", price: 900, status: "Available" },
+  { number: "103", type: "Suite",  price: 1500, status: "Available" },
+  { number: "104", type: "Single", price: 600, status: "Available" },
+  { number: "105", type: "Double", price: 900, status: "Available" }
+];
+
+// Bookings (loaded from localStorage if available)
 let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+// Payments (loaded from localStorage if available)
 let payments = JSON.parse(localStorage.getItem("payments")) || [];
-let rooms = JSON.parse(localStorage.getItem("rooms")) || [];
+
+// Hotel settings
 let hotelSettings = JSON.parse(localStorage.getItem("hotelSettings")) || {
   hotelName: "HotelPro",
   hotelAddress: "123 Main Street",
@@ -18,7 +30,6 @@ let hotelSettings = JSON.parse(localStorage.getItem("hotelSettings")) || {
 };
 
 // ------------------- Save All Data -------------------
-
 function saveData() {
   localStorage.setItem("bookings", JSON.stringify(bookings));
   localStorage.setItem("payments", JSON.stringify(payments));
@@ -27,7 +38,6 @@ function saveData() {
 }
 
 // ------------------- BOOKINGS -------------------
-
 function addBooking(booking) {
   booking.id = Date.now();
   bookings.push(booking);
@@ -45,7 +55,6 @@ function deleteBooking(index) {
 }
 
 // ------------------- PAYMENTS -------------------
-
 function addPayment(payment) {
   payment.id = Date.now();
   payments.push(payment);
@@ -63,7 +72,6 @@ function deletePayment(index) {
 }
 
 // ------------------- ROOMS -------------------
-
 function addRoom(room) {
   rooms.push(room);
   saveData();
@@ -80,14 +88,12 @@ function deleteRoom(index) {
 }
 
 // ------------------- SETTINGS -------------------
-
 function saveSettings(newSettings) {
   hotelSettings = { ...hotelSettings, ...newSettings };
   saveData();
 }
 
 // ------------------- COUNTS -------------------
-
 function getBookingCounts() {
   const confirmed = bookings.filter(b => b.status === "Confirmed").length;
   const pending = bookings.filter(b => b.status === "Pending").length;
