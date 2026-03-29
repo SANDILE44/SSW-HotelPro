@@ -141,120 +141,86 @@
   © 2026 HotelPro. All rights reserved.
 </footer>
 
+
 <script>
-// Dashboard data
-let bookings = [];
-const bookingsTable = document.getElementById("bookingsTable");
-const totalGuests = document.getElementById("totalGuests");
-const activeBookings = document.getElementById("activeBookings");
-const monthlyRevenue = document.getElementById("monthlyRevenue");
-const occupancyRate = document.getElementById("occupancyRate");
+  const bookingsTable = document.getElementById("bookingsTable");
+  const totalGuests = document.getElementById("totalGuests");
+  const activeBookings = document.getElementById("activeBookings");
+  const monthlyRevenue = document.getElementById("monthlyRevenue");
+  const occupancyRate = document.getElementById("occupancyRate");
 
-// Chart setup
-const ctx = document.getElementById('revenueChart').getContext('2d');
-const revenueChart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'Revenue (R)',
-      data: [],
-      borderColor: 'rgb(59,130,246)',
-      backgroundColor: 'rgba(59,130,246,0.2)',
-      tension: 0.3,
-      fill: true
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { display: false } }
-  }
-});
-
-// Update dashboard function
-function updateDashboard() {
-  totalGuests.textContent = bookings.length;
-  const active = bookings.filter(b => b.status !== 'Cancelled').length;
-  activeBookings.textContent = active;
-  const revenue = bookings.reduce((sum, b) => sum + b.revenue, 0);
-  monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(revenue);
-  occupancyRate.textContent = Math.min(100, Math.round((active / 10) * 100)) + '%';
-
-  bookingsTable.innerHTML = '';
-
-  bookings.forEach((b, index) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td class="border px-4 py-2"><input type="text" value="${b.guest}" class="border p-1 rounded w-full guestInput"></td>
-      <td class="border px-4 py-2"><input type="text" value="${b.room}" class="border p-1 rounded w-full roomInput"></td>
-      <td class="border px-4 py-2"><input type="date" value="${b.checkin}" class="border p-1 rounded w-full checkinInput"></td>
-      <td class="border px-4 py-2"><input type="date" value="${b.checkout}" class="border p-1 rounded w-full checkoutInput"></td>
-      <td class="border px-4 py-2"><input type="number" value="${b.numGuests}" class="border p-1 rounded w-full numGuestsInput"></td>
-      <td class="border px-4 py-2">
-        <select class="border p-1 rounded roomTypeSelect">
-          <option ${b.roomType==='Single'?'selected':''}>Single</option>
-          <option ${b.roomType==='Double'?'selected':''}>Double</option>
-          <option ${b.roomType==='Suite'?'selected':''}>Suite</option>
-        </select>
-      </td>
-      <td class="border px-4 py-2">
-        <select class="border p-1 rounded statusSelect">
-          <option ${b.status==='Confirmed'?'selected':''}>Confirmed</option>
-          <option ${b.status==='Pending'?'selected':''}>Pending</option>
-          <option ${b.status==='Cancelled'?'selected':''}>Cancelled</option>
-        </select>
-      </td>
-      <td class="border px-4 py-2"><input type="text" value="${b.specialRequests}" class="border p-1 rounded w-full specialRequestsInput"></td>
-      <td class="border px-4 py-2 flex gap-2">
-        <button class="bg-green-500 text-white px-2 py-1 rounded saveBtn">Save</button>
-        <button class="bg-red-500 text-white px-2 py-1 rounded deleteBtn">Delete</button>
-      </td>
-    `;
-    bookingsTable.appendChild(row);
-
-    // Save changes
-    row.querySelector('.saveBtn').addEventListener('click', () => {
-      b.guest = row.querySelector('.guestInput').value;
-      b.room = row.querySelector('.roomInput').value;
-      b.checkin = row.querySelector('.checkinInput').value;
-      b.checkout = row.querySelector('.checkoutInput').value;
-      b.numGuests = row.querySelector('.numGuestsInput').value;
-      b.roomType = row.querySelector('.roomTypeSelect').value;
-      b.status = row.querySelector('.statusSelect').value;
-      b.specialRequests = row.querySelector('.specialRequestsInput').value;
-      updateDashboard();
-    });
-
-    // Delete booking
-    row.querySelector('.deleteBtn').addEventListener('click', () => {
-      bookings.splice(index, 1);
-      updateDashboard();
-    });
+  // Chart setup remains the same
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Revenue (R)',
+        data: [],
+        borderColor: 'rgb(59,130,246)',
+        backgroundColor: 'rgba(59,130,246,0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
   });
 
-  // Update chart
-  revenueChart.data.labels = bookings.map(b => b.checkin);
-  revenueChart.data.datasets[0].data = bookings.map(b => b.revenue);
-  revenueChart.update();
-}
+  // Use the global bookings array from data.js
+  function updateDashboard() {
+    totalGuests.textContent = bookings.length;
+    const active = bookings.filter(b => b.status !== 'Cancelled').length;
+    activeBookings.textContent = active;
+    const revenue = bookings.reduce((sum, b) => sum + b.revenue, 0);
+    monthlyRevenue.textContent = new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(revenue);
+    occupancyRate.textContent = Math.min(100, Math.round((active / 10) * 100)) + '%';
 
-// Form submit
-document.getElementById("bookingForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const guest = document.getElementById("guestName").value;
-  const room = document.getElementById("roomNumber").value;
-  const checkin = document.getElementById("checkInDate").value;
-  const checkout = document.getElementById("checkOutDate").value;
-  const numGuests = document.getElementById("numGuests").value || 1;
-  const roomType = document.getElementById("roomType").value;
-  const status = document.getElementById("status").value;
-  const specialRequests = document.getElementById("specialRequests").value;
-  const revenue = Math.floor(Math.random() * 3000) + 500;
+    bookingsTable.innerHTML = '';
+    bookings.forEach((b, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-4 py-2">${b.guest}</td>
+        <td class="border px-4 py-2">${b.room}</td>
+        <td class="border px-4 py-2">${b.checkin}</td>
+        <td class="border px-4 py-2">${b.checkout}</td>
+        <td class="border px-4 py-2">${b.numGuests}</td>
+        <td class="border px-4 py-2">${b.roomType}</td>
+        <td class="border px-4 py-2">${b.status}</td>
+        <td class="border px-4 py-2">${b.specialRequests}</td>
+      `;
+      bookingsTable.appendChild(row);
+    });
 
-  bookings.push({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
-  e.target.reset();
+    // Update chart
+    revenueChart.data.labels = bookings.map(b => b.checkin);
+    revenueChart.data.datasets[0].data = bookings.map(b => b.revenue);
+    revenueChart.update();
+  }
+
+  // Form submit
+  document.getElementById("bookingForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const guest = document.getElementById("guestName").value;
+    const room = document.getElementById("roomNumber").value;
+    const checkin = document.getElementById("checkInDate").value;
+    const checkout = document.getElementById("checkOutDate").value;
+    const numGuests = document.getElementById("numGuests").value || 1;
+    const roomType = document.getElementById("roomType").value;
+    const status = document.getElementById("status").value;
+    const specialRequests = document.getElementById("specialRequests").value;
+    const revenue = Math.floor(Math.random() * 3000) + 500;
+
+    addBooking({ guest, room, checkin, checkout, numGuests, roomType, status, specialRequests, revenue });
+    e.target.reset();
+    updateDashboard();
+  });
+
+  // Run once on page load
   updateDashboard();
-});
 </script>
 
 <script src="hamburger.js"></script>
